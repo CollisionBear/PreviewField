@@ -1,5 +1,6 @@
 {
-    "name": "Fyrvall.DataEditor",
+    "name": "Fyrvall.PreviewField",
+    "rootNamespace": "",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],

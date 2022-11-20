@@ -1,5 +1,4 @@
-﻿using Fyrvall.UnityEssentials;
-using System;
+﻿using System;
 using UnityEditor;
 using UnityEngine;
 
