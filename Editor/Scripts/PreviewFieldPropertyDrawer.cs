@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEditor;
 using UnityEngine;
+using System.Linq;
 
 namespace Fyrvall.PreviewObjectPicker
 {
@@ -9,17 +10,27 @@ namespace Fyrvall.PreviewObjectPicker
     {
         private const int AudioPlayBackButtonWidth = 24;
 
+        private Type DisplayType;
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            if( DisplayType == null) {
+                DisplayType = GetTypeFromString(property.type);
+            }
+
             var expandableAttribute = (PreviewFieldAttribute)attribute;
-            var type = expandableAttribute.PreviewType;
             position = EditorGUI.PrefixLabel(position, label);
 
-            if (type == typeof(AudioClip)) {
+            if (DisplayType == typeof(AudioClip)) {
                 AudioClipGUI(position, property);
             } else {
-                DefaultGUI(position, property, type);
+                DefaultGUI(position, property, DisplayType);
             }
+        }
+
+        private Type GetTypeFromString(string typeName)
+        {
+            return AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes).FirstOrDefault(t => t.Name == typeName);
         }
 
         private void DefaultGUI(Rect position, SerializedProperty property, System.Type type)
