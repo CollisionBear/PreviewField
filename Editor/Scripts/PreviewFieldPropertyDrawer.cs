@@ -18,7 +18,7 @@ namespace Fyrvall.PreviewObjectPicker
                 DisplayType = GetTypeFromString(property.type);
 
                 if(DisplayType == null) {
-
+                    return;
                 }
             }
 
@@ -34,6 +34,10 @@ namespace Fyrvall.PreviewObjectPicker
 
         private Type GetTypeFromString(string typeName)
         {
+            if(typeName.ToLower().StartsWith("pptr")) {
+                typeName = typeName.ToLower().Replace("pptr<", "").Replace(">", "");
+            }
+
             return AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).FirstOrDefault(t => t.Name == typeName);
         }
 
