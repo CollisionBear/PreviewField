@@ -16,6 +16,10 @@ namespace Fyrvall.PreviewObjectPicker
         {
             if( DisplayType == null) {
                 DisplayType = GetTypeFromString(property.type);
+
+                if(DisplayType == null) {
+
+                }
             }
 
             var expandableAttribute = (PreviewFieldAttribute)attribute;
@@ -30,7 +34,7 @@ namespace Fyrvall.PreviewObjectPicker
 
         private Type GetTypeFromString(string typeName)
         {
-            return AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes).FirstOrDefault(t => t.Name == typeName);
+            return AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).FirstOrDefault(t => t.Name == typeName);
         }
 
         private void DefaultGUI(Rect position, SerializedProperty property, System.Type type)
