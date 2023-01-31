@@ -18,6 +18,7 @@ namespace Fyrvall.PreviewObjectPicker
                 DisplayType = GetTypeFromString(property.type);
 
                 if(DisplayType == null) {
+                    Debug.LogWarning("Failed to read type");
                     return;
                 }
             }
@@ -35,10 +36,10 @@ namespace Fyrvall.PreviewObjectPicker
         private Type GetTypeFromString(string typeName)
         {
             if(typeName.ToLower().StartsWith("pptr")) {
-                typeName = typeName.ToLower().Replace("pptr<", "").Replace(">", "");
+                typeName = typeName.ToLower().Replace("pptr<$", "").Replace(">", "");
             }
 
-            return AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).FirstOrDefault(t => t.Name == typeName);
+            return AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).FirstOrDefault(t => t.Name.ToLower() == typeName);
         }
 
         private void DefaultGUI(Rect position, SerializedProperty property, System.Type type)
