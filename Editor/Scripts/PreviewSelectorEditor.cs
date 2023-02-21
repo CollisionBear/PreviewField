@@ -62,16 +62,21 @@ namespace Fyrvall.PreviewObjectPicker
 
         private SearchField ObjectSearchField;
 
-        private float CurrentHeight;
+        private float PreviewWidth;
+        private float PreviewHeight;
 
         public void OnEnable()
         {
             ObjectSearchField = new SearchField();
-            ObjectSearchField.SetFocus();  
+            ObjectSearchField.SetFocus();
+
+            UpdateWindowHeight();
         }
 
         public void OnGUI()
         {
+            UpdateWindowHeight();
+
             EditorGUILayout.Space();
             HandleKeyboardInput();
             DrawLayout();
@@ -84,18 +89,19 @@ namespace Fyrvall.PreviewObjectPicker
             }
         }
 
+        private void UpdateWindowHeight()
+        {
+            PreviewWidth = position.width - (DefaultListViewWidth + 70);
+            PreviewHeight = position.height - (DefaultBottomRow);
+        }
+
         private void DrawLayout()
         {
-            var previewWidth = position.width - (DefaultListViewWidth + 70);
-            var previewHeight = position.height - (DefaultBottomRow);
-
-            CurrentHeight = previewHeight;
-
             using (new EditorGUILayout.VerticalScope()) {
-                using (new EditorGUILayout.VerticalScope(GUILayout.Height(previewHeight))) {
+                using (new EditorGUILayout.VerticalScope(GUILayout.Height(PreviewHeight))) {
                     using (new EditorGUILayout.HorizontalScope()) {
                         DisplayLeftColumn();
-                        DisplayRightColumn(previewWidth, previewHeight);
+                        DisplayRightColumn(PreviewWidth, PreviewHeight);
                     }
                 }
                 DisplayBottomRow();
@@ -376,20 +382,28 @@ namespace Fyrvall.PreviewObjectPicker
         {
             var currentIndex = FilteredObjects.IndexOf(selectedObject);
 
-            var minValue = currentIndex * ListLineHeight();
-            var maxValue = minValue + CurrentHeight;
+            var objectHeight = PreviewFieldUtils.SelectedStyle.TotalHeight();
+            var selectedObjectPosition = currentIndex * objectHeight;
 
-            if (ListScrollViewOffset.y < minValue) {
-                ListScrollViewOffset = new Vector2(0, minValue);
-            } else if (ListScrollViewOffset.y > maxValue) {
-                ListScrollViewOffset = new Vector2(0, maxValue);
+            var minValue = ListScrollViewOffset.y;
+            var maxValue = minValue + RoundToObjectHeight(PreviewHeight, objectHeight);
+
+            if (!IsInView(selectedObjectPosition, minValue, maxValue)) {
+                if (selectedObjectPosition < minValue) {
+                    ListScrollViewOffset = new Vector2(0, selectedObjectPosition);
+                } else if (selectedObjectPosition > maxValue) {
+                    ListScrollViewOffset = new Vector2(0, selectedObjectPosition + PreviewHeight);
+                }
             }
         }
 
-        private float ListLineHeight()
+        private float RoundToObjectHeight(float viewportHeight, float objectHeight)
         {
-            return PreviewFieldUtils.SelectedStyle.lineHeight + PreviewFieldUtils.SelectedStyle.margin.bottom + PreviewFieldUtils.SelectedStyle.margin.top;
+            var viewportIndex = Mathf.Floor(viewportHeight / objectHeight);
+            return viewportIndex * objectHeight;
         }
+
+        public bool IsInView(float selectedObjectPosition, float minValue, float maxValue) => selectedObjectPosition >= minValue && selectedObjectPosition <= maxValue;
 
         public void ChangeSelectedType(System.Type type)
         {
