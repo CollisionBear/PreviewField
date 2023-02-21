@@ -58,9 +58,6 @@ namespace Fyrvall.PreviewObjectPicker
         public List<Asset<Object>> FoundObjects = new List<Asset<Object>>();
         public List<Asset<Object>> FilteredObjects = new List<Asset<Object>>();
 
-        private GUIStyle SelectedStyle;
-        private GUIStyle UnselectedStyle;
-
         private Vector2 ListScrollViewOffset;
 
         private SearchField ObjectSearchField;
@@ -70,12 +67,11 @@ namespace Fyrvall.PreviewObjectPicker
         public void OnEnable()
         {
             ObjectSearchField = new SearchField();
-            ObjectSearchField.SetFocus();
+            ObjectSearchField.SetFocus();  
         }
 
         public void OnGUI()
         {
-            SetupStyles();
             EditorGUILayout.Space();
             HandleKeyboardInput();
             DrawLayout();
@@ -104,14 +100,6 @@ namespace Fyrvall.PreviewObjectPicker
                 }
                 DisplayBottomRow();
             }
-        }
-
-        private void SetupStyles()
-        {
-            SelectedStyle = new GUIStyle(GUI.skin.label);
-            SelectedStyle.normal.textColor = Color.white;
-            SelectedStyle.normal.background = CreateTexture(300, 20, new Color(0.24f, 0.48f, 0.9f));
-            UnselectedStyle = new GUIStyle(GUI.skin.label);
         }
 
         private void DisplayLeftColumn()
@@ -224,15 +212,6 @@ namespace Fyrvall.PreviewObjectPicker
             }
         }
 
-        private Texture2D CreateTexture(int width, int height, Color color)
-        {
-            Texture2D result = new Texture2D(width, height);
-            result.SetPixels(Enumerable.Repeat(color, width * height).ToArray());
-            result.Apply();
-
-            return result;
-        }
-
         public void DisplaySearchField()
         {
             var searchRect = GUILayoutUtility.GetRect(100, 32);
@@ -252,9 +231,9 @@ namespace Fyrvall.PreviewObjectPicker
         public GUIStyle GetGUIStyle(Asset<Object> o)
         {
             if (SelectedObject == o || SelectedObject.Object == o.Object) {
-                return SelectedStyle;
+                return PreviewFieldUtils.SelectedStyle;
             } else {
-                return UnselectedStyle;
+                return PreviewFieldUtils.UnselectedStyle;
             }
         }
 
@@ -286,6 +265,8 @@ namespace Fyrvall.PreviewObjectPicker
             var result = new List<Asset<Object>>();
             if (typeof(ScriptableObject).IsAssignableFrom(type)) {
                 result = FindScriptableObjectOfType(type);
+            } else if(typeof(GameObject).IsAssignableFrom(type)) {
+                result = FindGameObjects(type);
             } else if (typeof(Component).IsAssignableFrom(type)) {
                 result = FindPrefabsWithComponentType(type);
             } else if (typeof(Object).IsAssignableFrom(type)) {
@@ -310,6 +291,16 @@ namespace Fyrvall.PreviewObjectPicker
             return AssetDatabase.FindAssets(string.Format("t:AudioClip"))
                 .Select(g => AssetDatabase.LoadAssetAtPath<Object>(AssetDatabase.GUIDToAssetPath(g)))
                 .OrderBy(o => o.name)
+                .Select(a => new Asset<Object>(a, a.GetInstanceID()))
+                .ToList();
+        }
+
+        private List<Asset<Object>> FindGameObjects(System.Type type)
+        {
+            return AssetDatabase.FindAssets("t:GameObject")
+                .Select(g => AssetDatabase.GUIDToAssetPath(g))
+                .Where(p => p.EndsWith(".prefab"))
+                .Select(p => AssetDatabase.LoadAssetAtPath<GameObject>(p))
                 .Select(a => new Asset<Object>(a, a.GetInstanceID()))
                 .ToList();
         }
@@ -385,14 +376,19 @@ namespace Fyrvall.PreviewObjectPicker
         {
             var currentIndex = FilteredObjects.IndexOf(selectedObject);
 
-            var minValue = currentIndex * (EditorGUIUtility.singleLineHeight + 2);
+            var minValue = currentIndex * ListLineHeight();
             var maxValue = minValue + CurrentHeight;
 
-            if (ListScrollViewOffset.y > minValue) {
+            if (ListScrollViewOffset.y < minValue) {
                 ListScrollViewOffset = new Vector2(0, minValue);
             } else if (ListScrollViewOffset.y > maxValue) {
                 ListScrollViewOffset = new Vector2(0, maxValue);
             }
+        }
+
+        private float ListLineHeight()
+        {
+            return PreviewFieldUtils.SelectedStyle.lineHeight + PreviewFieldUtils.SelectedStyle.margin.bottom + PreviewFieldUtils.SelectedStyle.margin.top;
         }
 
         public void ChangeSelectedType(System.Type type)
