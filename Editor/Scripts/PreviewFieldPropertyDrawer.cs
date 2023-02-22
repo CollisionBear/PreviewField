@@ -8,6 +8,19 @@ namespace Fyrvall.PreviewObjectPicker
     [CustomPropertyDrawer(typeof(PreviewFieldAttribute))]
     public class PreviewFieldPropertyDrawer : PropertyDrawer
     {
+        private static GUIContent ObjectPickerContent = EditorGUIUtility.IconContent("d_pick");
+        private static GUIContent PrefabContent = EditorGUIUtility.IconContent("Prefab Icon");
+
+        private static readonly GUIStyle TinyButtonStyle = new GUIStyle(EditorStyles.miniButton) {
+            margin = new RectOffset(1, 1, 1, 1),
+            border = new RectOffset(),
+            padding = new RectOffset()
+        };
+
+        public static readonly GUIStyle TinyIconObjectFieldStyle = new GUIStyle(EditorStyles.objectField) {
+            padding = new RectOffset(3, 3, 3, 3)
+        };
+
         private Type DisplayType;
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
@@ -43,11 +56,12 @@ namespace Fyrvall.PreviewObjectPicker
             var namePlatePosition = new Rect(position.position, position.size - new Vector2(24, 0));
             var selectButtonPosition = new Rect(position.position + new Vector2(namePlatePosition.width, 0), new Vector2(24, position.size.y));
 
-            if (GUI.Button(namePlatePosition, GetPropertyValueName(property, type), EditorStyles.objectField)) {
+            if (GUI.Button(namePlatePosition, GetPropertyValueName(property, type), TinyIconObjectFieldStyle)) {
                 EditorGUIUtility.PingObject(property.objectReferenceValue);
             }
 
-            if (GUI.Button(selectButtonPosition, EditorGUIUtility.FindTexture("PrefabNormal Icon"), EditorStyles.miniButton)) {
+            if (GUI.Button(selectButtonPosition, ObjectPickerContent, TinyButtonStyle)) {
+                PreviewSelectorEditor.CreateStyles();
                 PreviewSelectorEditor.ShowAuxWindow(type, property);
             }
 
@@ -75,9 +89,9 @@ namespace Fyrvall.PreviewObjectPicker
         private GUIContent GetPropertyValueName(SerializedProperty serializedProperty, Type type)
         {
             if (serializedProperty.objectReferenceValue == null) {
-                return new GUIContent(string.Format("None ({0})", type.Name), EditorGUIUtility.FindTexture("PrefabNormal Icon"));
+                return new GUIContent(string.Format("None ({0})", type.Name), PrefabContent.image);
             } else {
-                return new GUIContent(string.Format("{0} ({1})", serializedProperty.objectReferenceValue.name, type.Name), EditorGUIUtility.FindTexture("PrefabNormal Icon"));
+                return new GUIContent(string.Format("{0} ({1})", serializedProperty.objectReferenceValue.name, type.Name), PrefabContent.image);
             }
         }
     }

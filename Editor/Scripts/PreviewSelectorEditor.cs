@@ -11,8 +11,29 @@ namespace Fyrvall.PreviewObjectPicker
         const int DefaultListViewWidth = 250;
         const int DefaultBottomRow = 38;
 
-        public static Dictionary<System.Type, List<Asset<Object>>> ObjectCache = new Dictionary<System.Type, List<Asset<Object>>>();
+        static readonly Vector2 SearchBoxSize = new Vector2(100, 32);
+        static Dictionary<System.Type, List<Asset<Object>>> ObjectCache = new Dictionary<System.Type, List<Asset<Object>>>();
 
+        public static GUIStyle SelectedStyle;
+        public static GUIStyle UnselectedStyle;
+
+        public static void CreateStyles()
+        {
+            SelectedStyle = new GUIStyle(GUI.skin.label);
+            SelectedStyle.normal.textColor = Color.white;
+            SelectedStyle.normal.background = CreateTexture(300, 20, new Color(0.24f, 0.48f, 0.9f));
+
+            UnselectedStyle = new GUIStyle(GUI.skin.label);
+
+        }
+        private static Texture2D CreateTexture(int width, int height, Color color)
+        {
+            Texture2D result = new Texture2D(width, height);
+            result.SetPixels(Enumerable.Repeat(color, width * height).ToArray());
+            result.Apply();
+
+            return result;
+        }
         public class Asset<T> where T : Object
         {
             public T Object;
@@ -69,14 +90,12 @@ namespace Fyrvall.PreviewObjectPicker
         {
             ObjectSearchField = new SearchField();
             ObjectSearchField.SetFocus();
-
             UpdateWindowHeight();
         }
 
         public void OnGUI()
         {
             UpdateWindowHeight();
-
             EditorGUILayout.Space();
             HandleKeyboardInput();
             DrawLayout();
@@ -220,7 +239,7 @@ namespace Fyrvall.PreviewObjectPicker
 
         public void DisplaySearchField()
         {
-            var searchRect = GUILayoutUtility.GetRect(100, 32);
+            var searchRect = GUILayoutUtility.GetRect(SearchBoxSize.x, SearchBoxSize.y);
             var tmpFilterString = ObjectSearchField.OnGUI(searchRect, FilterString);
 
             if (tmpFilterString != FilterString) {
@@ -237,9 +256,9 @@ namespace Fyrvall.PreviewObjectPicker
         public GUIStyle GetGUIStyle(Asset<Object> o)
         {
             if (SelectedObject == o || SelectedObject.Object == o.Object) {
-                return PreviewFieldUtils.SelectedStyle;
+                return SelectedStyle;
             } else {
-                return PreviewFieldUtils.UnselectedStyle;
+                return UnselectedStyle;
             }
         }
 
@@ -382,7 +401,7 @@ namespace Fyrvall.PreviewObjectPicker
         {
             var currentIndex = FilteredObjects.IndexOf(selectedObject);
 
-            var objectHeight = PreviewFieldUtils.SelectedStyle.TotalHeight();
+            var objectHeight = SelectedStyle.TotalHeight();
             var selectedObjectPosition = currentIndex * objectHeight;
 
             var minValue = ListScrollViewOffset.y;
