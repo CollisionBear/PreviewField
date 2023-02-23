@@ -4,11 +4,16 @@ When creating a public Prefab field in a MonoBehaviour or ScriptableObject  by a
 attribute (available in the ``Fyrvall.PreviewObjectPicker`` namespace).
 
 ## Getting started
-First you need a cope of the software. It can be downloaded from the following sources.
+First you need a cope of the software. 
+
+### Unity Package
+The editor extension can be added Unity's package manager from 'Add package from git URL'
 * <https://github.com/bonahona/previewfield.git>
 
-If grabbed from Unity's Asset Store, everything should be set up already.
-If you grabbed from any other source, you need to put the PreviewField inside your Unity project's Asset folder.
+### Manual download
+It can be downloaded from the following sources.
+You need to put the PreviewField content inside your Unity project's Asset folder.
+* <https://github.com/bonahona/previewfield.git>
 
 ## Example
 Decorate a public property in a  with the attribute. By default the class's name will be displayed.
