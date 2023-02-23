@@ -85,32 +85,43 @@ namespace Fyrvall.PreviewObjectPicker
         private float PreviewWidth;
         private float PreviewHeight;
 
-        public void OnEnable()
+        private Vector2 LastWindowSize;
+
+        private void OnEnable()
         {
             ObjectSearchField = new SearchField();
             ObjectSearchField.SetFocus();
             UpdateWindowHeight();
         }
 
-        public void OnGUI()
+        private void OnGUI()
         {
-            UpdateWindowHeight();
+            if (HasResizedWindow()) {
+                UpdateWindowHeight();
+            }
+
             EditorGUILayout.Space();
             HandleKeyboardInput();
             DrawLayout();
         }
 
-        public void OnDisable()
+        private void OnDisable()
         {
             if (SelectedObjectEditor != null) {
                 GameObject.DestroyImmediate(SelectedObjectEditor);
             }
         }
 
+        private bool HasResizedWindow() => LastWindowSize != position.size;
+
         private void UpdateWindowHeight()
         {
             PreviewWidth = position.width - (DefaultListViewWidth + 70);
             PreviewHeight = position.height - (DefaultBottomRow);
+
+            LastWindowSize = position.size;
+
+            EnsureItemIsInView(SelectedObject);
         }
 
         private void DrawLayout()
