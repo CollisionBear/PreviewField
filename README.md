@@ -16,17 +16,37 @@ Decorate a public property in a  with the attribute. By default the class's name
 using using Fyrvall.PreviewObjectPicker;
 
 class TestClass: ScriptableObject {
-	[PreviewField(typeof(GameObject))]
+	[PreviewField]
 	public GameObject SomeTestPrefab;
 }
 ```
 or
 ```cs
-  class TestClass: ScriptableObject {
-	[Fyrvall.PreviewObjectPicker.PreviewField(typeof(GameObject))]
+public class TestClass: ScriptableObject {
+	[Fyrvall.PreviewObjectPicker.PreviewField]
 	public GameObject SomeTestPrefab;
 }
-  ```
+```
+This also works for anything `Component` based scripts.
+```cs
+using using Fyrvall.PreviewObjectPicker;
+
+public class TestClass: ScriptableObject {
+	[PreviewField]
+	public Collider ColliderPrefab;
+}
+```
+or a custom `MonoBehaviour`
+```cs
+using using Fyrvall.PreviewObjectPicker;
+
+public class TestComponent : MonoBehaviour { }
+
+public class TestClass: ScriptableObject {
+	[PreviewField]
+	public TestComponent TestComponentPrefab;
+}
+```
 
 ## License
 This project is released as Open Source under a [MIT license](https://opensource.org/licenses/MIT).
