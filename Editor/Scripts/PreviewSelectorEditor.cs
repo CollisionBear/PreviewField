@@ -418,7 +418,7 @@ namespace Fyrvall.PreviewObjectPicker
             var totalHeight = PreviewHeight - controllerHeight;
 
             var minValue = ListScrollViewOffset.y;
-            var listHeight = RoundToObjectHeight(totalHeight, objectHeight);
+            var listHeight = RoundToObjectHeight(totalHeight, objectHeight) - objectHeight;
             var maxValue = minValue + listHeight;
 
             if (!IsInView(selectedObjectPosition, minValue, maxValue)) {
