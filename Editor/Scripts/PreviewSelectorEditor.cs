@@ -64,9 +64,8 @@ namespace Fyrvall.PreviewObjectPicker
             window.ChangeSelectedType(type);
             window.SerializedProperty = serializedProperty;
             window.SetSelectedObject(serializedProperty.objectReferenceInstanceIDValue);
-            window.EnsureItemIsInView(window.SelectedObject);
             window.titleContent = new GUIContent(type.Name);
-            window.Show();
+            window.ShowAuxWindow();
         }
 
         public System.Type SelectedType;
@@ -408,16 +407,18 @@ namespace Fyrvall.PreviewObjectPicker
             var totalHeight = PreviewHeight - controllerHeight;
 
             var minValue = ListScrollViewOffset.y;
-            var maxValue = minValue + RoundToObjectHeight(totalHeight, objectHeight);
+            var listHeight = RoundToObjectHeight(totalHeight, objectHeight);
+            var maxValue = minValue + listHeight;
 
             if (!IsInView(selectedObjectPosition, minValue, maxValue)) {
                 if (selectedObjectPosition < minValue) {
                     ListScrollViewOffset = new Vector2(0, selectedObjectPosition);
                 } else if (selectedObjectPosition > maxValue) {
-                    ListScrollViewOffset += new Vector2(0, EditorStyles.label.TotalHeight());
+                    ListScrollViewOffset = new Vector2(0, selectedObjectPosition - (listHeight + EditorStyles.label.TotalHeight()));
                 }
             }
         }
+
 
         private float RoundToObjectHeight(float viewportHeight, float objectHeight)
         {
