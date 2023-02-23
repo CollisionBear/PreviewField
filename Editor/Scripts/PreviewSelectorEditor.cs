@@ -91,7 +91,6 @@ namespace Fyrvall.PreviewObjectPicker
         {
             ObjectSearchField = new SearchField();
             ObjectSearchField.SetFocus();
-            UpdateWindowHeight();
         }
 
         private void OnGUI()
