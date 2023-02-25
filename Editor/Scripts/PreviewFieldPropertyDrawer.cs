@@ -8,7 +8,7 @@ namespace Fyrvall.PreviewObjectPicker
     [CustomPropertyDrawer(typeof(PreviewFieldAttribute))]
     public class PreviewFieldPropertyDrawer : PropertyDrawer
     {
-        private static GUIContent ObjectPickerContent = EditorGUIUtility.IconContent("d_pick");
+        private static GUIContent ObjectPickerContent = EditorGUIUtility.IconContent("d_PreMatCube");
         private static GUIContent PrefabContent = EditorGUIUtility.IconContent("Prefab Icon");
 
         private static readonly GUIStyle TinyButtonStyle = new GUIStyle(EditorStyles.miniButton) {

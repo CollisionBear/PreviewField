@@ -227,11 +227,8 @@ namespace Fyrvall.PreviewObjectPicker
         }
 
         public void DisplayObjectList()
-        {
-            using (new EditorGUILayout.HorizontalScope()) {
-                EditorGUILayout.LabelField("Found " + FilteredObjects.Count());
-            }
-
+        {       
+            EditorGUILayout.LabelField("Found " + FilteredObjects.Count());
             DisplaySearchField();
 
             using (var scrollScope = new EditorGUILayout.ScrollViewScope(ListScrollViewOffset)) {
