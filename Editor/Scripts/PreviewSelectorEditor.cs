@@ -48,14 +48,7 @@ namespace Fyrvall.PreviewObjectPicker
                 Id = id;
             }
 
-            private string GetObjectName(T o)
-            {
-                if (o == null) {
-                    return "None";
-                } else {
-                    return o.name;
-                }
-            }
+            private string GetObjectName(T o) => o?.name ?? "None";
         }
 
         public static void ShowAuxWindow(System.Type type, SerializedProperty serializedProperty)
@@ -115,7 +108,7 @@ namespace Fyrvall.PreviewObjectPicker
 
         private void UpdateWindowHeight()
         {
-            PreviewWidth = position.width - (DefaultListViewWidth + 70);
+            PreviewWidth = position.width - (DefaultListViewWidth + (GUI.skin.box.margin.left + GUI.skin.box.margin.right) * 2);
             PreviewHeight = position.height - (DefaultBottomRow);
 
             LastWindowSize = position.size;
@@ -274,7 +267,7 @@ namespace Fyrvall.PreviewObjectPicker
                 return;
             }
 
-            SelectedObjectEditor.OnInteractivePreviewGUI(GUILayoutUtility.GetRect(previewWidth, previewHeight - 6), GUIStyle.none);
+            SelectedObjectEditor.OnInteractivePreviewGUI(GUILayoutUtility.GetRect(previewWidth, previewHeight - 8), GUIStyle.none);
             Repaint();
         }
 
@@ -293,6 +286,8 @@ namespace Fyrvall.PreviewObjectPicker
                 return ObjectCache[type];
             }
 
+            var timer = new System.Diagnostics.Stopwatch();
+            timer.Start();
             var result = new List<Asset<Object>>();
             if (typeof(ScriptableObject).IsAssignableFrom(type)) {
                 result = FindScriptableObjectOfType(type);
