@@ -11,6 +11,7 @@ namespace Fyrvall.PreviewObjectPicker
         const int DefaultListViewWidth = 250;
         const int DefaultBottomRow = 38;
 
+        private static readonly Vector2 MinWindowSize = new Vector2(400, 400);
         static readonly Vector2 SearchBoxSize = new Vector2(100, 32);
         static Dictionary<System.Type, List<Asset<Object>>> ObjectCache = new Dictionary<System.Type, List<Asset<Object>>>();
 
@@ -37,15 +38,14 @@ namespace Fyrvall.PreviewObjectPicker
         public class Asset<T> where T : Object
         {
             public T Object;
-            public string Name;
             public long Id;
-            public Texture2D PreviewTexture;
+            public GUIContent Content { get; set; }
 
             public Asset(T o, long id)
             {
                 Object = o;
-                Name = GetObjectName(o);
                 Id = id;
+                Content = new GUIContent(GetObjectName(o), AssetPreview.GetMiniThumbnail(Object));
             }
 
             private string GetObjectName(T o) => o?.name ?? "None";
@@ -58,6 +58,7 @@ namespace Fyrvall.PreviewObjectPicker
             window.SerializedProperty = serializedProperty;
             window.SetSelectedObject(serializedProperty.objectReferenceInstanceIDValue);
             window.titleContent = new GUIContent(type.Name);
+            window.minSize = MinWindowSize;
             window.ShowAuxWindow();
         }
 
@@ -207,7 +208,7 @@ namespace Fyrvall.PreviewObjectPicker
                 return;
             }
 
-            var currentIndex = FilteredObjects.IndexOf(SelectedObject);
+            var currentIndex = Mathf.Max(FilteredObjects.IndexOf(SelectedObject), 0);
             currentIndex = Mathf.Clamp(currentIndex + delta, 0, FilteredObjects.Count - 1);
             ChangeSelectedObject(FilteredObjects[currentIndex]);
         }
@@ -226,10 +227,13 @@ namespace Fyrvall.PreviewObjectPicker
 
             using (var scrollScope = new EditorGUILayout.ScrollViewScope(ListScrollViewOffset)) {
                 ListScrollViewOffset = scrollScope.scrollPosition;
-                foreach (var foundObject in FilteredObjects.ToList()) {
+
+                var itemWidth = DefaultListViewWidth - 24;
+                foreach (var foundObject in FilteredObjects) {
                     using (new EditorGUILayout.HorizontalScope()) {
-                        if (GUILayout.Button(foundObject.Name, GetGUIStyle(foundObject))) {
-                            ChangeSelectedObject(foundObject);
+                        //if (GUILayout.Button(foundObject.Name, GetGUIStyle(foundObject), GUILayout.Height(EditorGUIUtility.singleLineHeight))) {
+                        if (GUILayout.Button(foundObject.Content, GetGUIStyle(foundObject), GUILayout.Height(EditorGUIUtility.singleLineHeight), GUILayout.Width(itemWidth))) {
+                                ChangeSelectedObject(foundObject);
                         }
                     }
                 }
