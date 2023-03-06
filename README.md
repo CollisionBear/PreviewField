@@ -2,7 +2,7 @@
 ![alt Preview Field splash](https://repository-images.githubusercontent.com/568438140/f2f76207-f9cd-42f9-9ae5-fa4684931b36)
 Preview Field is a Unity3D editor extension, to allow for Prefab previews when selecting models etc. 
 When creating a public Prefab field in a MonoBehaviour or ScriptableObject  by adding the  ``[PreviewField]``
-attribute (available in the ``Fyrvall.PreviewObjectPicker`` namespace).
+attribute (available in the ``CollisionBear.PreviewObjectPicker`` namespace).
 
 ## Getting started
 First you need a copy of the software. 
@@ -19,7 +19,7 @@ You need to put the PreviewField content inside your Unity project's Asset folde
 ## Example
 Decorate a public property with the attribute.
 ```cs
-using using Fyrvall.PreviewObjectPicker;
+using using CollisionBear.PreviewObjectPicker;
 
 class TestClass: ScriptableObject {
 	[PreviewField]
@@ -29,13 +29,13 @@ class TestClass: ScriptableObject {
 or
 ```cs
 public class TestClass: ScriptableObject {
-	[Fyrvall.PreviewObjectPicker.PreviewField]
+	[CollisionBear.PreviewObjectPicker.PreviewField]
 	public GameObject SomeTestPrefab;
 }
 ```
 This also works for anything `Component` based scripts.
 ```cs
-using using Fyrvall.PreviewObjectPicker;
+using using CollisionBear.PreviewObjectPicker;
 
 public class TestClass: ScriptableObject {
 	[PreviewField]
@@ -44,7 +44,7 @@ public class TestClass: ScriptableObject {
 ```
 or a custom `MonoBehaviour`
 ```cs
-using using Fyrvall.PreviewObjectPicker;
+using using CollisionBear.PreviewObjectPicker;
 
 public class TestComponent : MonoBehaviour { }
 
