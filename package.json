@@ -1,13 +1,13 @@
 {
-	"name": "com.fyrvall.previewfield",
+	"name": "com.collisionbear.previewfield",
 	"version": "1.1.1",
 	"description": "Lightweight Unity Editor allow Prefab selection fields in the inspector to show Previews of Models etc",
-	"displayName": "Bona Preview Field",
+	"displayName": "Preview Field",
 	"unity": "2019.4",
 	"unityRelease": "40f1",
 	"licenseUrl": "https://opensource.org/licenses/MIT",
 	"author": {
-		"name": "Bona Fyrvall"
+		"name": "CollisionBear"
 	}
 }
 	

@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using System.Linq;
 
-namespace Fyrvall.PreviewObjectPicker
+namespace CollisionBear.PreviewObjectPicker
 {
     [CustomPropertyDrawer(typeof(PreviewFieldAttribute))]
     public class PreviewFieldPropertyDrawer : PropertyDrawer

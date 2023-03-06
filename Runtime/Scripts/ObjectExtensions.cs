@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace Fyrvall.PreviewObjectPicker
+namespace CollisionBear.PreviewObjectPicker
 {
     public static class ObjectExtension
     {

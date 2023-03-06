@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
-namespace Fyrvall.PreviewObjectPicker
+namespace CollisionBear.PreviewObjectPicker
 {
     public class PreviewSelectorEditor : EditorWindow
     {

@@ -1,11 +1,8 @@
 {
-    "name": "Fyrvall.PreviewField.Editor",
-    "references": [
-        "Fyrvall.PreviewField"
-    ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "name": "CollisionBear.PreviewField",
+    "rootNamespace": "",
+    "references": [],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Fyrvall.PreviewObjectPicker
+namespace CollisionBear.PreviewObjectPicker
 {
     public class PreviewFieldAttribute : PropertyAttribute
     {
