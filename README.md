@@ -1,5 +1,5 @@
 # Bona Preview Field
-![alt Preview Field splash](http://gamedevelopersplayground.com/files/PreviewFieldCoverImage.png)
+![alt Preview Field splash](https://repository-images.githubusercontent.com/568438140/f2f76207-f9cd-42f9-9ae5-fa4684931b36)
 Bona Preview Field is a Unity3D editor extension, to allow for Prefab previews when selecting models etc. 
 When creating a public Prefab field in a MonoBehaviour or ScriptableObject  by adding the  ``[PreviewField]``
 attribute (available in the ``Fyrvall.PreviewObjectPicker`` namespace).
