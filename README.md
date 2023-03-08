@@ -1,15 +1,16 @@
 # Preview Field
 ![alt Preview Field splash](https://repository-images.githubusercontent.com/568438140/f2f76207-f9cd-42f9-9ae5-fa4684931b36)
-When selecting a prefab, get a complete list of available prefabs with an interactibe preview.
+When selecting a prefab, get a complete list of available prefabs with an interactive preview.
 Perfect for anyone looking for a more artist-friendly workflow.
 
-Preview Field is a Unity3D editor extension, to allow for Prefab previews when selecting models etc. 
-When creating a public Prefab field in a MonoBehaviour or ScriptableObject, by adding the  ``[PreviewField]``
+Preview Field is a Unity3D editor extension, to allow for Prefab previews when selecting prefabs, models etc. 
+When creating a public object (Prefab) field in a MonoBehaviour or ScriptableObject, by adding the  ``[PreviewField]``
 attribute (available in the ``CollisionBear.PreviewObjectPicker`` namespace) the property
-look slighly diffferent. By the left a new button is added for an object picker with 
+will look slightly different. To the far right is a new Prefab picker button, opening the preview
+object selector.
 
 ## Getting started
-First you need a copy of the software. 
+First you need to get your hands on a copy of the editor. We support a few options. 
 
 ### Unity Package
 The editor extension can be added Unity's package manager from 'Add package from git URL'
@@ -17,8 +18,8 @@ The editor extension can be added Unity's package manager from 'Add package from
 
 ### Manual download
 It can be downloaded from the following sources.
+* <https://github.com/CollisionBear/PreviewField/releases/download/1.2.0/PreviewField-1.2.0.unitypackage>
 You need to put the PreviewField content inside your Unity project's Asset folder.
-* <https://github.com/collisionbear/previewfield.git>
 
 ## Example
 Decorate a public property with the attribute.
@@ -37,7 +38,7 @@ public class TestClass: ScriptableObject {
 	public GameObject SomeTestPrefab;
 }
 ```
-This also works for anything `Component` based scripts.
+This also works for any `Component` based scripts.
 ```cs
 using using CollisionBear.PreviewObjectPicker;
 
