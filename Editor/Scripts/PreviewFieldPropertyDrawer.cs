@@ -8,8 +8,14 @@ namespace CollisionBear.PreviewObjectPicker
     [CustomPropertyDrawer(typeof(PreviewFieldAttribute))]
     public class PreviewFieldPropertyDrawer : PropertyDrawer
     {
+        private const float ObjectPickerButtonWidth = 24;
+
+        private static readonly Vector2 ButtonOffset = new Vector2(-8, 0);
+
         private static GUIContent ObjectPickerContent = EditorGUIUtility.IconContent("d_PreMatCube");
         private static GUIContent PrefabContent = EditorGUIUtility.IconContent("Prefab Icon");
+
+        private static Texture2D BackgroundImage = PreviewRenderingUtility.CreateTexture(256, 256, new Color(0.32f, 0.32f, 0.32f, 1f));
 
         private static readonly GUIStyle TinyButtonStyle = new GUIStyle(EditorStyles.miniButton) {
             margin = new RectOffset(1, 1, 1, 1),
@@ -19,6 +25,11 @@ namespace CollisionBear.PreviewObjectPicker
 
         public static readonly GUIStyle TinyIconObjectFieldStyle = new GUIStyle(EditorStyles.objectField) {
             padding = new RectOffset(3, 3, 3, 3)
+        };
+
+        public static readonly GUIStyle ClipLabelStyle = new GUIStyle(EditorStyles.label) {
+            padding = new RectOffset(3, 3, 3, 3),
+            clipping = TextClipping.Clip
         };
 
         private Type DisplayType;
@@ -51,12 +62,27 @@ namespace CollisionBear.PreviewObjectPicker
 
         private string GetPptrTypeName(string unityTypeName) => unityTypeName.ToLower().Replace("pptr<$", "").Replace(">", "");
 
-        private void DefaultGUI(Rect position, SerializedProperty property, System.Type type)
+        private void DefaultGUI(Rect position, SerializedProperty property, Type type)
         {
-            var namePlatePosition = new Rect(position.position, position.size - new Vector2(24, 0));
-            var selectButtonPosition = new Rect(position.position + new Vector2(namePlatePosition.width, 0), new Vector2(24, position.size.y));
+            var previewAttribute = attribute as PreviewFieldAttribute;
 
-            if (GUI.Button(namePlatePosition, GetPropertyValueName(property, type), TinyIconObjectFieldStyle)) {
+            if(previewAttribute.ShowInspectorPreview) {
+                PreviewPropertyDrawer(previewAttribute, position, property, type);
+            } else {
+                UnityPropertyDrawer(position, property, type);
+            }
+        }
+
+        private void PreviewPropertyDrawer(PreviewFieldAttribute previewAttribute, Rect position, SerializedProperty property, Type type)
+        {
+            var offset = new Vector2(position.width - (previewAttribute.PreviewSize.x), 0);
+            var imagePosition = new Rect(position.position + offset, previewAttribute.PreviewSize);
+            var nameplatePosition = new Rect(position.position + offset, new Vector2(previewAttribute.PreviewSize.x, EditorGUIUtility.singleLineHeight));
+            var selectButtonPosition = new Rect(position.position + (position.size - (new Vector2(ObjectPickerButtonWidth, ObjectPickerButtonWidth)) + ButtonOffset), new Vector2(ObjectPickerButtonWidth, ObjectPickerButtonWidth));
+
+            GUI.DrawTexture(imagePosition, BackgroundImage);
+            GUI.DrawTexture(imagePosition, PreviewRenderingUtility.GetPreviewTexture(GetPrefab(property.objectReferenceValue)));
+            if (GUI.Button(nameplatePosition, GetPropertyValueName(property, type), ClipLabelStyle)) {
                 EditorGUIUtility.PingObject(property.objectReferenceValue);
             }
 
@@ -65,9 +91,40 @@ namespace CollisionBear.PreviewObjectPicker
                 PreviewSelectorEditor.ShowAuxWindow(type, property);
             }
 
+            HandleIspectorEvent(imagePosition, property, type);
+        }
+
+        private UnityEngine.Object GetPrefab(UnityEngine.Object obj)
+        { 
+            if(obj is MonoBehaviour monoBehaviour) {
+                return monoBehaviour.gameObject;
+            } else {
+                return obj;
+            }
+        }
+
+        private void UnityPropertyDrawer(Rect position, SerializedProperty property, Type type)
+        {
+            var nameplatePosition = new Rect(position.position, position.size - new Vector2(ObjectPickerButtonWidth, 0));
+            var selectButtonPosition = new Rect(position.position + new Vector2(nameplatePosition.width, 0), new Vector2(ObjectPickerButtonWidth, position.size.y));
+
+            if (GUI.Button(nameplatePosition, GetPropertyValueNameAndIcon(property, type), TinyIconObjectFieldStyle)) {
+                EditorGUIUtility.PingObject(property.objectReferenceValue);
+            }
+
+            if (GUI.Button(selectButtonPosition, ObjectPickerContent, TinyButtonStyle)) {
+                PreviewSelectorEditor.CreateStyles();
+                PreviewSelectorEditor.ShowAuxWindow(type, property);
+            }
+
+            HandleIspectorEvent(nameplatePosition, property, type);
+        }
+
+        private void HandleIspectorEvent(Rect nameplatePosition, SerializedProperty property, Type type)
+        {
             var currentEvent = Event.current;
-            if (currentEvent.type.In(EventType.DragUpdated, EventType.DragPerform)) {
-                if (!namePlatePosition.Contains(currentEvent.mousePosition)) {
+            if (currentEvent.type == EventType.DragUpdated || currentEvent.type == EventType.DragPerform) {
+                if (!nameplatePosition.Contains(currentEvent.mousePosition)) {
                     return;
                 }
 
@@ -86,12 +143,32 @@ namespace CollisionBear.PreviewObjectPicker
             }
         }
 
-        private GUIContent GetPropertyValueName(SerializedProperty serializedProperty, Type type)
+        private GUIContent GetPropertyValueNameAndIcon(SerializedProperty serializedProperty, Type type)
         {
             if (serializedProperty.objectReferenceValue == null) {
                 return new GUIContent(string.Format("None ({0})", type.Name), PrefabContent.image);
             } else {
                 return new GUIContent(string.Format("{0} ({1})", serializedProperty.objectReferenceValue.name, type.Name), PrefabContent.image);
+            }
+        }
+
+        private GUIContent GetPropertyValueName(SerializedProperty serializedProperty, Type type)
+        {
+            if (serializedProperty.objectReferenceValue == null) {
+                return new GUIContent(string.Format("None ({0})", type.Name));
+            } else {
+                return new GUIContent(string.Format("{0} ({1})", serializedProperty.objectReferenceValue.name, type.Name));
+            }
+        }
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            var previewAttribute = attribute as PreviewFieldAttribute;
+
+            if(previewAttribute.ShowInspectorPreview) {
+                return previewAttribute.PreviewSize.y;
+            } else {
+                return EditorGUIUtility.singleLineHeight;
             }
         }
     }

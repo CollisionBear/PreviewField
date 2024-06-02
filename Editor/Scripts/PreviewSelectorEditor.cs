@@ -22,19 +22,12 @@ namespace CollisionBear.PreviewObjectPicker
         {
             SelectedStyle = new GUIStyle(GUI.skin.label);
             SelectedStyle.normal.textColor = Color.white;
-            SelectedStyle.normal.background = CreateTexture(300, 20, new Color(0.24f, 0.48f, 0.9f));
+            SelectedStyle.normal.background = PreviewRenderingUtility.CreateTexture(300, 20, new Color(0.24f, 0.48f, 0.9f));
 
             UnselectedStyle = new GUIStyle(GUI.skin.label);
 
         }
-        private static Texture2D CreateTexture(int width, int height, Color color)
-        {
-            Texture2D result = new Texture2D(width, height);
-            result.SetPixels(Enumerable.Repeat(color, width * height).ToArray());
-            result.Apply();
-
-            return result;
-        }
+        
         public class Asset<T> where T : Object
         {
             public T Object;
@@ -231,7 +224,6 @@ namespace CollisionBear.PreviewObjectPicker
                 var itemWidth = DefaultListViewWidth - 24;
                 foreach (var foundObject in FilteredObjects) {
                     using (new EditorGUILayout.HorizontalScope()) {
-                        //if (GUILayout.Button(foundObject.Name, GetGUIStyle(foundObject), GUILayout.Height(EditorGUIUtility.singleLineHeight))) {
                         if (GUILayout.Button(foundObject.Content, GetGUIStyle(foundObject), GUILayout.Height(EditorGUIUtility.singleLineHeight), GUILayout.Width(itemWidth))) {
                                 ChangeSelectedObject(foundObject);
                         }
@@ -300,7 +292,7 @@ namespace CollisionBear.PreviewObjectPicker
             } else if (typeof(Component).IsAssignableFrom(type)) {
                 result = FindPrefabsWithComponentType(type);
             } else if (typeof(Object).IsAssignableFrom(type)) {
-                result = FindAudioClips();
+                result = FindAssetTypes(type);
             }
 
             ObjectCache[type] = result;
@@ -316,9 +308,9 @@ namespace CollisionBear.PreviewObjectPicker
                 .ToList();
         }
 
-        public List<Asset<Object>> FindAudioClips()
+        public List<Asset<Object>> FindAssetTypes(System.Type type)
         {
-            return AssetDatabase.FindAssets(string.Format("t:AudioClip"))
+            return AssetDatabase.FindAssets(string.Format("t:{0}", type.Name))
                 .Select(g => AssetDatabase.LoadAssetAtPath<Object>(AssetDatabase.GUIDToAssetPath(g)))
                 .OrderBy(o => o.name)
                 .Select(a => new Asset<Object>(a, a.GetInstanceID()))
