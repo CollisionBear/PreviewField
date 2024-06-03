@@ -1,13 +1,9 @@
 # Preview Field
 ![alt Preview Field splash](https://repository-images.githubusercontent.com/568438140/f2f76207-f9cd-42f9-9ae5-fa4684931b36)
-When selecting a prefab, get a complete list of available prefabs with an interactive preview.
-Perfect for anyone looking for a more artist-friendly workflow.
+Enhance your workflow with Preview Field, the a Unity3D editor extension for effecient Prefab selection. Perfect for developers and artists alike, Preview Field improves
+the way you choose Prefabs by replacing Unity's default selection field with an interactive alternative.
 
-Preview Field is a Unity3D editor extension, to allow for Prefab previews when selecting prefabs, models etc. 
-When creating a public object (Prefab) field in a MonoBehaviour or ScriptableObject, by adding the  ``[PreviewField]``
-attribute (available in the ``CollisionBear.PreviewObjectPicker`` namespace) the property
-will look slightly different. To the far right is a new Prefab picker button, opening the preview
-object selector.
+Preview Field offers an intuitive interface that anyone familiar with Prefabs will instantly recognize and appreciate.
 
 ## Getting started
 First you need to get your hands on a copy of the editor. We support a few options. 
@@ -18,7 +14,7 @@ The editor extension can be added Unity's package manager from 'Add package from
 
 ### Manual download
 It can be downloaded from the following sources.
-* <https://github.com/CollisionBear/PreviewField/releases/download/1.2.0/PreviewField-1.2.0.unitypackage>
+* <https://github.com/CollisionBear/PreviewField/releases/download/1.3.0/PreviewField-1.3.0.unitypackage>
 You need to put the PreviewField content inside your Unity project's Asset folder.
 
 ## Example
