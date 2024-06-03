@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 using System.Linq;
 
@@ -32,7 +31,7 @@ namespace CollisionBear.PreviewObjectPicker
             clipping = TextClipping.Clip
         };
 
-        private Type DisplayType;
+        private System.Type DisplayType;
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -49,20 +48,20 @@ namespace CollisionBear.PreviewObjectPicker
             DefaultGUI(position, property, DisplayType);
         }
 
-        private Type GetTypeFromString(string unityTypeName)
+        private System.Type GetTypeFromString(string unityTypeName)
         {
             if(unityTypeName.ToLower().StartsWith("pptr")) {
                 unityTypeName = GetPptrTypeName(unityTypeName);
             }
 
-            return AppDomain.CurrentDomain.GetAssemblies()
+            return System.AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(a => a.GetTypes())
                 .FirstOrDefault(t => t.Name.ToLower() == unityTypeName);
         }
 
         private string GetPptrTypeName(string unityTypeName) => unityTypeName.ToLower().Replace("pptr<$", "").Replace(">", "");
 
-        private void DefaultGUI(Rect position, SerializedProperty property, Type type)
+        private void DefaultGUI(Rect position, SerializedProperty property, System.Type type)
         {
             var previewAttribute = attribute as PreviewFieldAttribute;
 
@@ -73,7 +72,7 @@ namespace CollisionBear.PreviewObjectPicker
             }
         }
 
-        private void PreviewPropertyDrawer(PreviewFieldAttribute previewAttribute, Rect position, SerializedProperty property, Type type)
+        private void PreviewPropertyDrawer(PreviewFieldAttribute previewAttribute, Rect position, SerializedProperty property, System.Type type)
         {
             var offset = new Vector2(position.width - (previewAttribute.PreviewSize.x), 0);
             var imagePosition = new Rect(position.position + offset, previewAttribute.PreviewSize);
@@ -103,7 +102,7 @@ namespace CollisionBear.PreviewObjectPicker
             }
         }
 
-        private void UnityPropertyDrawer(Rect position, SerializedProperty property, Type type)
+        private void UnityPropertyDrawer(Rect position, SerializedProperty property, System.Type type)
         {
             var nameplatePosition = new Rect(position.position, position.size - new Vector2(ObjectPickerButtonWidth, 0));
             var selectButtonPosition = new Rect(position.position + new Vector2(nameplatePosition.width, 0), new Vector2(ObjectPickerButtonWidth, position.size.y));
@@ -120,7 +119,7 @@ namespace CollisionBear.PreviewObjectPicker
             HandleIspectorEvent(nameplatePosition, property, type);
         }
 
-        private void HandleIspectorEvent(Rect nameplatePosition, SerializedProperty property, Type type)
+        private void HandleIspectorEvent(Rect nameplatePosition, SerializedProperty property, System.Type type)
         {
             var currentEvent = Event.current;
             if (currentEvent.type == EventType.DragUpdated || currentEvent.type == EventType.DragPerform) {
@@ -138,12 +137,14 @@ namespace CollisionBear.PreviewObjectPicker
                     } else if (typeof(Component).IsAssignableFrom(type)) {
                         var draggedComponent = (draggedObject as GameObject).GetComponent(type);
                         property.objectReferenceValue = draggedComponent;
+                    } else if(typeof(Object).IsAssignableFrom(type)) {
+                        property.objectReferenceValue = draggedObject;
                     }
                 }
             }
         }
 
-        private GUIContent GetPropertyValueNameAndIcon(SerializedProperty serializedProperty, Type type)
+        private GUIContent GetPropertyValueNameAndIcon(SerializedProperty serializedProperty, System.Type type)
         {
             if (serializedProperty.objectReferenceValue == null) {
                 return new GUIContent(string.Format("None ({0})", type.Name), PrefabContent.image);
@@ -152,7 +153,7 @@ namespace CollisionBear.PreviewObjectPicker
             }
         }
 
-        private GUIContent GetPropertyValueName(SerializedProperty serializedProperty, Type type)
+        private GUIContent GetPropertyValueName(SerializedProperty serializedProperty, System.Type type)
         {
             if (serializedProperty.objectReferenceValue == null) {
                 return new GUIContent(string.Format("None ({0})", type.Name));

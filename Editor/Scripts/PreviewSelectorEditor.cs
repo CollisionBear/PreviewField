@@ -208,7 +208,7 @@ namespace CollisionBear.PreviewObjectPicker
 
         private void ApplyValue()
         {
-            SerializedProperty.objectReferenceValue = SelectedObject.Object;
+            SerializedProperty.objectReferenceValue = SelectedObject.Object as Object;
             SerializedProperty.serializedObject.ApplyModifiedProperties();
 
         }

@@ -11,8 +11,12 @@ namespace CollisionBear.PreviewObjectPicker.Examples {
         [Space]
         [Header("Preview Field drawers")]
         [PreviewField]
-        public GameObject PreviewFieldGameObjectPrefab;
+        public GameObject PreviewFieldGameObjectPrefab;     // Previews all GameObjects
         [PreviewField]
-        public GameObject PreviewFieldBlockerPrefab;
+        public TestBlocker PreviewFieldBlockerPrefab;       // Previews only GameObjects with a TestBlocker component
+
+        [Space]
+        [PreviewField]
+        public Texture Icon;                                 // Previews a Sprite type asset
     }
 }

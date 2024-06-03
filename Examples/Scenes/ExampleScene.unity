@@ -152,10 +152,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44b46dcff5b615946bd450c268e70e2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NormalGameObjectPrefab: {fileID: 925183039092277433, guid: 891466484ef430347b128374eb764b2e, type: 3}
-  NormalBlockerPrefab: {fileID: 996436278914185745, guid: 891466484ef430347b128374eb764b2e, type: 3}
   PreviewFieldGameObjectPrefab: {fileID: 8831313287236538069, guid: cacccf3a67308d747ae19a3e29a5c99e, type: 3}
   PreviewFieldBlockerPrefab: {fileID: 925183039092277433, guid: 891466484ef430347b128374eb764b2e, type: 3}
+  Icon: {fileID: 2800000, guid: de412bec8977fe84e8e6d879a792ba1b, type: 3}
 --- !u!4 &268996139
 Transform:
   m_ObjectHideFlags: 0
