@@ -80,7 +80,12 @@ namespace CollisionBear.PreviewObjectPicker
             var selectButtonPosition = new Rect(position.position + (position.size - (new Vector2(ObjectPickerButtonWidth, ObjectPickerButtonWidth)) + ButtonOffset), new Vector2(ObjectPickerButtonWidth, ObjectPickerButtonWidth));
 
             GUI.DrawTexture(imagePosition, BackgroundImage);
-            GUI.DrawTexture(imagePosition, PreviewRenderingUtility.GetPreviewTexture(GetPrefab(property.objectReferenceValue)));
+
+            var previewTexture = PreviewRenderingUtility.GetPreviewTexture(GetPrefab(property.objectReferenceValue));
+            if (previewTexture != null) {
+                GUI.DrawTexture(imagePosition, previewTexture);
+            }
+
             if (GUI.Button(nameplatePosition, GetPropertyValueName(property, type), ClipLabelStyle)) {
                 EditorGUIUtility.PingObject(property.objectReferenceValue);
             }
