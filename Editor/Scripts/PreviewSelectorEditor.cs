@@ -8,12 +8,20 @@ namespace CollisionBear.PreviewObjectPicker
 {
     public class PreviewSelectorEditor : EditorWindow
     {
-        const int DefaultListViewWidth = 250;
-        const int DefaultBottomRow = 38;
+        private const string EditorName = "Preview Field";
+        private const string Version = "1.3.2";
+        private const string CollisionBearUrl = "https://assetstore.unity.com/publishers/82099";
+
+        private const int DefaultListViewWidth = 250;
+        private const int DefaultBottomRow = 38;
+        private const int ListViewItemHeight = 18;
+        private const int FooterHeight = 30;
 
         private static readonly Vector2 MinWindowSize = new Vector2(400, 400);
         static readonly Vector2 SearchBoxSize = new Vector2(100, 32);
         static Dictionary<System.Type, List<Asset<Object>>> ObjectCache = new Dictionary<System.Type, List<Asset<Object>>>();
+
+        private static Texture2D LogoTexture;
 
         public static GUIStyle SelectedStyle;
         public static GUIStyle UnselectedStyle;
@@ -78,6 +86,8 @@ namespace CollisionBear.PreviewObjectPicker
         {
             ObjectSearchField = new SearchField();
             ObjectSearchField.SetFocus();
+
+            LogoTexture = Resources.Load<Texture2D>("CollsionsBearLogo");
         }
 
         private void OnGUI()
@@ -151,20 +161,28 @@ namespace CollisionBear.PreviewObjectPicker
         private void DisplayBottomRow()
         {
             using (new EditorGUILayout.VerticalScope(GUILayout.Height(DefaultBottomRow))) {
-                OnDisplayBottomRow();
+                using (new EditorGUILayout.HorizontalScope()) {
+                    if (GUILayout.Button("Ok")) {
+                        ApplyValue();
+                        Close();
+                    }
+
+                    if (GUILayout.Button("Cancel")) {
+                        Close();
+                    }
+                }
             }
         }
 
-        protected virtual void OnDisplayBottomRow()
-        {
-            using (new EditorGUILayout.HorizontalScope()) {
-                if (GUILayout.Button("Ok")) {
-                    ApplyValue();
-                    Close();
+        private void DisplayFooter() {
+            using (new EditorGUILayout.HorizontalScope(GUILayout.Height(FooterHeight))) {
+                if (GUILayout.Button(LogoTexture, EditorStyles.label)) {
+                    Application.OpenURL(CollisionBearUrl);
                 }
 
-                if (GUILayout.Button("Cancel")) {
-                    Close();
+                using (new EditorGUILayout.VerticalScope(GUILayout.Height(FooterHeight))) {
+                    EditorGUILayout.LabelField(EditorName);
+                    EditorGUILayout.LabelField($"Version {Version}");
                 }
             }
         }
@@ -213,7 +231,7 @@ namespace CollisionBear.PreviewObjectPicker
 
         }
 
-        public void DisplayObjectList()
+        private void DisplayObjectList()
         {       
             EditorGUILayout.LabelField("Found " + FilteredObjects.Count());
             DisplaySearchField();
