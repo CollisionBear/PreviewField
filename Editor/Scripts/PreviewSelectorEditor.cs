@@ -13,7 +13,7 @@ namespace CollisionBear.PreviewObjectPicker
         private const string Version = "1.3.2";
         private const string CollisionBearUrl = "https://assetstore.unity.com/publishers/82099";
 
-        private const int ListViewWidth = 150;
+        private const int ListViewWidth = 280;
         private const int ListViewItemHeight = 18;
         private const int FooterHeight = 30;
 
@@ -64,6 +64,8 @@ namespace CollisionBear.PreviewObjectPicker
 
         private int SelectedObjectIndex;
 
+        private float PreviewWidth = 0;
+        private float PreviewHeight = 0;
         private float ScrollViewHeight = 0;
         private Vector2 ListScrollViewOffset;
 
@@ -71,8 +73,6 @@ namespace CollisionBear.PreviewObjectPicker
 
         private GUIStyle SelectedStyle;
         private GUIStyle UnselectedStyle;
-
-        private Vector2 LastWindowSize;
 
         private void OnEnable()
         {
@@ -86,6 +86,9 @@ namespace CollisionBear.PreviewObjectPicker
 
         private void OnGUI()
         {
+            PreviewWidth = position.width - (ListViewWidth + 32);
+            PreviewHeight = position.height - 28;
+
             EditorGUILayout.Space();
             HandleKeyboardInput();
             DrawLayout();
@@ -114,8 +117,8 @@ namespace CollisionBear.PreviewObjectPicker
                 }
 
                 if (SelectedObject != null) {
-                    using (new EditorGUILayout.VerticalScope(GUI.skin.box, GUILayout.Width(ListViewItemHeight), GUILayout.Height(ListViewItemHeight))) {
-                        DisplayRightColumn(ListViewItemHeight, ListViewItemHeight);
+                    using (new EditorGUILayout.VerticalScope(GUI.skin.box)) {
+                        DisplayRightColumn();
                     }
                 }
             }
@@ -131,12 +134,12 @@ namespace CollisionBear.PreviewObjectPicker
 
             DisplaySearchField();
             DisplayScrollListView();
+            DisplayBottomRow();
             DisplayFooter();
         }
 
         public void RefreshObjects() {
             if (SelectedType != null && FilterString != null) {
-                //UpdateFoundObjects(SelectedType, force: true);
                 UpdateFilter(FilterString);
             }
         }
@@ -207,32 +210,30 @@ namespace CollisionBear.PreviewObjectPicker
             }
         }
 
-        private void DisplayRightColumn(float previewWidth, float previewHeight)
+        private void DisplayRightColumn()
         {
-            if(previewWidth <= 0 || previewHeight <= 0) {
-                return;
-            }
+            var previewWidth = Mathf.Max(32, PreviewWidth);
+            var previewHeight = Mathf.Max(32, PreviewHeight);
 
-            using (new EditorGUILayout.VerticalScope(GUI.skin.box, GUILayout.Width(previewWidth), GUILayout.Height(previewHeight))) {
+            using (new EditorGUILayout.VerticalScope(GUI.skin.box)) {
                 DisplaySelection(previewWidth, previewHeight);
             }
         }
 
-        //private void DisplayBottomRow()
-        //{
-        //    using (new EditorGUILayout.VerticalScope(GUILayout.Height(DefaultBottomRow))) {
-        //        using (new EditorGUILayout.HorizontalScope()) {
-        //            if (GUILayout.Button("Ok")) {
-        //                ApplyValue();
-        //                Close();
-        //            }
+        private void DisplayBottomRow() {
+            using (new EditorGUILayout.VerticalScope(GUILayout.Height(32))) {
+                using (new EditorGUILayout.HorizontalScope()) {
+                    if (GUILayout.Button("Ok")) {
+                        ApplyValue();
+                        Close();
+                    }
 
-        //            if (GUILayout.Button("Cancel")) {
-        //                Close();
-        //            }
-        //        }
-        //    }
-        //}
+                    if (GUILayout.Button("Cancel")) {
+                        Close();
+                    }
+                }
+            }
+        }
 
         private void HandleKeyboardInput()
         {
@@ -279,7 +280,11 @@ namespace CollisionBear.PreviewObjectPicker
                 return;
             }
 
-            SelectedObjectEditor.OnInteractivePreviewGUI(GUILayoutUtility.GetRect(previewWidth, previewHeight - 8), GUIStyle.none);
+            if(previewHeight <= 0 || previewHeight <= 0) {
+                return;
+            }
+
+            SelectedObjectEditor.OnInteractivePreviewGUI(GUILayoutUtility.GetRect(previewWidth, previewHeight), GUIStyle.none);
             Repaint();
         }
 
@@ -419,14 +424,6 @@ namespace CollisionBear.PreviewObjectPicker
         }
 
         private float GetExpectedScrollPosition(int index) => index * ListViewItemHeight;
-
-        private float RoundToObjectHeight(float viewportHeight, float objectHeight)
-        {
-            var viewportIndex = Mathf.Floor(viewportHeight / objectHeight);
-            return viewportIndex * objectHeight;
-        }
-
-        public bool IsInView(float selectedObjectPosition, float minValue, float maxValue) => selectedObjectPosition >= minValue && selectedObjectPosition <= maxValue;
 
         public void ChangeSelectedType(System.Type type)
         {
