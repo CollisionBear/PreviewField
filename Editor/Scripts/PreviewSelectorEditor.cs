@@ -6,47 +6,36 @@ using UnityEngine;
 
 namespace CollisionBear.PreviewObjectPicker
 {
+    [InitializeOnLoad]
     public class PreviewSelectorEditor : EditorWindow
     {
         private const string EditorName = "Preview Field";
         private const string Version = "1.3.2";
         private const string CollisionBearUrl = "https://assetstore.unity.com/publishers/82099";
 
-        private const int DefaultListViewWidth = 250;
-        private const int DefaultBottomRow = 38;
+        private const int ListViewWidth = 150;
         private const int ListViewItemHeight = 18;
         private const int FooterHeight = 30;
 
         private static readonly Vector2 MinWindowSize = new Vector2(400, 400);
-        static readonly Vector2 SearchBoxSize = new Vector2(100, 32);
         static Dictionary<System.Type, List<Asset<Object>>> ObjectCache = new Dictionary<System.Type, List<Asset<Object>>>();
 
         private static Texture2D LogoTexture;
 
-        public static GUIStyle SelectedStyle;
-        public static GUIStyle UnselectedStyle;
-
-        public static void CreateStyles()
-        {
-            SelectedStyle = new GUIStyle(GUI.skin.label);
-            SelectedStyle.normal.textColor = Color.white;
-            SelectedStyle.normal.background = PreviewRenderingUtility.CreateTexture(300, 20, new Color(0.24f, 0.48f, 0.9f));
-
-            UnselectedStyle = new GUIStyle(GUI.skin.label);
-
-        }
-        
         public class Asset<T> where T : Object
         {
             public T Object;
             public long Id;
-            public GUIContent Content { get; set; }
+
+            public Texture Icon;
+            public string Name;
 
             public Asset(T o, long id)
             {
                 Object = o;
                 Id = id;
-                Content = new GUIContent(GetObjectName(o), AssetPreview.GetMiniThumbnail(Object));
+                Icon = AssetPreview.GetMiniThumbnail(Object);
+                Name = GetObjectName(o);
             }
 
             private string GetObjectName(T o) => o?.name ?? "None";
@@ -73,17 +62,22 @@ namespace CollisionBear.PreviewObjectPicker
         public List<Asset<Object>> FoundObjects = new List<Asset<Object>>();
         public List<Asset<Object>> FilteredObjects = new List<Asset<Object>>();
 
+        private int SelectedObjectIndex;
+
+        private float ScrollViewHeight = 0;
         private Vector2 ListScrollViewOffset;
 
         private SearchField ObjectSearchField;
 
-        private float PreviewWidth;
-        private float PreviewHeight;
+        private GUIStyle SelectedStyle;
+        private GUIStyle UnselectedStyle;
 
         private Vector2 LastWindowSize;
 
         private void OnEnable()
         {
+            CreateStyles();
+
             ObjectSearchField = new SearchField();
             ObjectSearchField.SetFocus();
 
@@ -92,10 +86,6 @@ namespace CollisionBear.PreviewObjectPicker
 
         private void OnGUI()
         {
-            if (HasResizedWindow()) {
-                UpdateWindowHeight();
-            }
-
             EditorGUILayout.Space();
             HandleKeyboardInput();
             DrawLayout();
@@ -108,69 +98,91 @@ namespace CollisionBear.PreviewObjectPicker
             }
         }
 
-        private bool HasResizedWindow() => LastWindowSize != position.size;
+        public void CreateStyles() {
+            SelectedStyle = new GUIStyle(GUI.skin.label);
+            SelectedStyle.normal.textColor = Color.white;
+            SelectedStyle.normal.background = PreviewRenderingUtility.CreateTexture(300, ListViewItemHeight, new Color(0.24f, 0.48f, 0.9f));
 
-        private void UpdateWindowHeight()
-        {
-            PreviewWidth = position.width - (DefaultListViewWidth + (GUI.skin.box.margin.left + GUI.skin.box.margin.right) * 2);
-            PreviewHeight = position.height - (DefaultBottomRow);
+            UnselectedStyle = new GUIStyle(GUI.skin.label);
 
-            LastWindowSize = position.size;
-
-            EnsureItemIsInView(SelectedObject);
         }
 
-        private void DrawLayout()
-        {
-            using (new EditorGUILayout.VerticalScope()) {
-                using (new EditorGUILayout.VerticalScope(GUILayout.Height(PreviewHeight))) {
-                    using (new EditorGUILayout.HorizontalScope()) {
-                        DisplayLeftColumn();
-                        DisplayRightColumn(PreviewWidth, PreviewHeight);
-                    }
+        private void DrawLayout() {
+            using (new EditorGUILayout.HorizontalScope()) {
+                using (new EditorGUILayout.VerticalScope(GUI.skin.box, GUILayout.Width(ListViewWidth))) {
+                    DisplayObjectList();
                 }
-                DisplayBottomRow();
-            }
-        }
 
-        private void DisplayLeftColumn()
-        {
-            using (new EditorGUILayout.VerticalScope(GUI.skin.box, GUILayout.Width(DefaultListViewWidth))) {
-                DisplayObjectList();
-                EditorGUILayout.Space();
-                if (GUILayout.Button("Refresh", EditorStyles.miniButton)) {
-
-                    if (ObjectCache.ContainsKey(SelectedType)) {
-                        ObjectCache.Remove(SelectedType);
+                if (SelectedObject != null) {
+                    using (new EditorGUILayout.VerticalScope(GUI.skin.box, GUILayout.Width(ListViewItemHeight), GUILayout.Height(ListViewItemHeight))) {
+                        DisplayRightColumn(ListViewItemHeight, ListViewItemHeight);
                     }
-
-                    FoundObjects = FindAssetsOfType(SelectedType).OrderBy(a => a.Object.name).ToList();
-                    ResetFilter();
-                    SetSelectedObject(SerializedProperty.objectReferenceInstanceIDValue);
                 }
             }
         }
 
-        private void DisplayRightColumn(float previewWidth, float previewHeight)
-        {
-            using (new EditorGUILayout.VerticalScope(GUI.skin.box, GUILayout.Width(previewWidth), GUILayout.Height(previewHeight))) {
-                DisplaySelection(previewWidth, previewHeight);
+        private void DisplayObjectList() {
+            using (new EditorGUILayout.HorizontalScope()) {
+                EditorGUILayout.LabelField("Found " + FilteredObjects.Count());
+                if (GUILayout.Button("Refresh", GUILayout.Width(64))) {
+                    RefreshObjects();
+                }
+            }
+
+            DisplaySearchField();
+            DisplayScrollListView();
+            DisplayFooter();
+        }
+
+        public void RefreshObjects() {
+            if (SelectedType != null && FilterString != null) {
+                //UpdateFoundObjects(SelectedType, force: true);
+                UpdateFilter(FilterString);
             }
         }
 
-        private void DisplayBottomRow()
-        {
-            using (new EditorGUILayout.VerticalScope(GUILayout.Height(DefaultBottomRow))) {
-                using (new EditorGUILayout.HorizontalScope()) {
-                    if (GUILayout.Button("Ok")) {
-                        ApplyValue();
-                        Close();
-                    }
+        private void DisplaySearchField() {
+            var searchRect = GUILayoutUtility.GetRect(100, 32);
+            var tmpFilterString = ObjectSearchField.OnGUI(searchRect, FilterString);
 
-                    if (GUILayout.Button("Cancel")) {
-                        Close();
+            if (tmpFilterString != FilterString) {
+                UpdateFilter(tmpFilterString);
+                FilterString = tmpFilterString;
+            }
+        }
+
+        private void UpdateFilter(string filterString) {
+            FilteredObjects = FilterObjects(FoundObjects, filterString);
+        }
+
+        private void DisplayScrollListView() {
+            if (FoundObjects == null) {
+                return;
+            }
+
+            using (new EditorGUILayout.VerticalScope(GUI.skin.box)) {
+                using (var scrollScope = new EditorGUILayout.ScrollViewScope(ListScrollViewOffset)) {
+                    ListScrollViewOffset = scrollScope.scrollPosition;
+                    foreach (var foundObject in new List<Asset<Object>>(FilteredObjects)) {
+                        if (foundObject == null) {
+                            FilteredObjects.Remove(foundObject);
+                        } else {
+                            using (new EditorGUILayout.HorizontalScope(GUILayout.Height(ListViewItemHeight))) {
+                                if (foundObject.Icon != null) {
+                                    GUI.DrawTexture(GUILayoutUtility.GetRect(16, 16, GUILayout.Width(16)), foundObject.Icon);
+                                }
+                                if (GUILayout.Button(foundObject.Name, GetGUIStyle(foundObject))) {
+                                    ChangeSelectedObject(foundObject);
+                                }
+                            }
+                        }
                     }
                 }
+            }
+
+            if (Event.current.type == EventType.Repaint) {
+                var lastRect = GUILayoutUtility.GetLastRect();
+                ScrollViewHeight = lastRect.height;
             }
         }
 
@@ -187,6 +199,41 @@ namespace CollisionBear.PreviewObjectPicker
             }
         }
 
+        private GUIStyle GetGUIStyle(Asset<Object> o) {          
+            if (SelectedObject == o) {
+                return SelectedStyle;
+            } else {
+                return UnselectedStyle;
+            }
+        }
+
+        private void DisplayRightColumn(float previewWidth, float previewHeight)
+        {
+            if(previewWidth <= 0 || previewHeight <= 0) {
+                return;
+            }
+
+            using (new EditorGUILayout.VerticalScope(GUI.skin.box, GUILayout.Width(previewWidth), GUILayout.Height(previewHeight))) {
+                DisplaySelection(previewWidth, previewHeight);
+            }
+        }
+
+        //private void DisplayBottomRow()
+        //{
+        //    using (new EditorGUILayout.VerticalScope(GUILayout.Height(DefaultBottomRow))) {
+        //        using (new EditorGUILayout.HorizontalScope()) {
+        //            if (GUILayout.Button("Ok")) {
+        //                ApplyValue();
+        //                Close();
+        //            }
+
+        //            if (GUILayout.Button("Cancel")) {
+        //                Close();
+        //            }
+        //        }
+        //    }
+        //}
+
         private void HandleKeyboardInput()
         {
             if (Event.current.clickCount == 2) {
@@ -197,82 +244,33 @@ namespace CollisionBear.PreviewObjectPicker
 
             if (Event.current.type == EventType.KeyDown) {
                 if (Event.current.keyCode == KeyCode.DownArrow) {
-                    UpdateSelectedObjectIndex(delta: 1);
+                    UpdateSelectedObjectIndex(SelectedObjectIndex + 1);
                     Event.current.Use();
-                    return;
                 } else if (Event.current.keyCode == KeyCode.UpArrow) {
-                    UpdateSelectedObjectIndex(delta: -1);
+                    UpdateSelectedObjectIndex(SelectedObjectIndex + -1);
                     Event.current.Use();
-                    return;
-                } else if (Event.current.keyCode == KeyCode.Return) {
-                    Event.current.Use();
+                } else if(Event.current.keyCode == KeyCode.Return) {
                     ApplyValue();
                     Close();
-                    return;
+                } else if(Event.current.keyCode == KeyCode.Escape) {
+                    Close();
                 }
             }
         }
 
-        private void UpdateSelectedObjectIndex(int delta)
-        {
+        private void UpdateSelectedObjectIndex(int newIndex) {
             if (FilteredObjects.Count == 0) {
                 return;
             }
 
-            var currentIndex = Mathf.Max(FilteredObjects.IndexOf(SelectedObject), 0);
-            currentIndex = Mathf.Clamp(currentIndex + delta, 0, FilteredObjects.Count - 1);
-            ChangeSelectedObject(FilteredObjects[currentIndex]);
+            newIndex = Mathf.Clamp(newIndex, 0, FilteredObjects.Count - 1);
+            ChangeSelectedObject(FilteredObjects[newIndex]);
         }
 
         private void ApplyValue()
         {
             SerializedProperty.objectReferenceValue = SelectedObject.Object as Object;
             SerializedProperty.serializedObject.ApplyModifiedProperties();
-
-        }
-
-        private void DisplayObjectList()
-        {       
-            EditorGUILayout.LabelField("Found " + FilteredObjects.Count());
-            DisplaySearchField();
-
-            using (var scrollScope = new EditorGUILayout.ScrollViewScope(ListScrollViewOffset)) {
-                ListScrollViewOffset = scrollScope.scrollPosition;
-
-                var itemWidth = DefaultListViewWidth - 24;
-                foreach (var foundObject in FilteredObjects) {
-                    using (new EditorGUILayout.HorizontalScope()) {
-                        if (GUILayout.Button(foundObject.Content, GetGUIStyle(foundObject), GUILayout.Height(EditorGUIUtility.singleLineHeight), GUILayout.Width(itemWidth))) {
-                                ChangeSelectedObject(foundObject);
-                        }
-                    }
-                }
-            }
-        }
-
-        public void DisplaySearchField()
-        {
-            var searchRect = GUILayoutUtility.GetRect(SearchBoxSize.x, SearchBoxSize.y);
-            var tmpFilterString = ObjectSearchField.OnGUI(searchRect, FilterString);
-
-            if (tmpFilterString != FilterString) {
-                UpdateFilter(tmpFilterString);
-                FilterString = tmpFilterString;
-            }
-        }
-
-        public void UpdateFilter(string filterString)
-        {
-            FilteredObjects = FilterObjects(FoundObjects, filterString);
-        }
-
-        public GUIStyle GetGUIStyle(Asset<Object> o)
-        {
-            if (SelectedObject == o || SelectedObject.Object == o.Object) {
-                return SelectedStyle;
-            } else {
-                return UnselectedStyle;
-            }
         }
 
         public void DisplaySelection(float previewWidth, float previewHeight)
@@ -283,15 +281,6 @@ namespace CollisionBear.PreviewObjectPicker
 
             SelectedObjectEditor.OnInteractivePreviewGUI(GUILayoutUtility.GetRect(previewWidth, previewHeight - 8), GUIStyle.none);
             Repaint();
-        }
-
-        public float GetLabelWidth(float totalWidth, float minWidth)
-        {
-            if (totalWidth <= minWidth) {
-                return totalWidth;
-            }
-
-            return Mathf.Min(minWidth, totalWidth);
         }
 
         public List<Asset<Object>> FindAssetsOfType(System.Type type)
@@ -399,7 +388,8 @@ namespace CollisionBear.PreviewObjectPicker
             }
 
             SelectedObject = selectedObject;
-            EnsureItemIsInView(selectedObject);
+            var index = FilteredObjects.IndexOf(SelectedObject);
+            EnsureSelectItemInView(index);
 
             if (SelectedObjectEditor != null) {
                 GameObject.DestroyImmediate(SelectedObjectEditor);
@@ -412,29 +402,23 @@ namespace CollisionBear.PreviewObjectPicker
             GUI.FocusControl(null);
         }
 
-        public void EnsureItemIsInView(Asset<Object> selectedObject)
-        {
-            var currentIndex = FilteredObjects.IndexOf(selectedObject);
+        private void EnsureSelectItemInView(int index) {
+            SelectedObjectIndex = index;
+            var expectedScrollPosition = GetExpectedScrollPosition(index);
 
-            var objectHeight = SelectedStyle.TotalHeight();
-            var selectedObjectPosition = currentIndex * objectHeight;
+            var scrollPositionTop = ListScrollViewOffset.y;
+            var scrollPositionBottom = scrollPositionTop + ScrollViewHeight;
 
-            var controllerHeight = EditorStyles.label.TotalHeight() + SearchBoxSize.y + 40 + EditorStyles.miniButton.TotalHeight();
-            var totalHeight = PreviewHeight - controllerHeight;
-
-            var minValue = ListScrollViewOffset.y;
-            var listHeight = RoundToObjectHeight(totalHeight, objectHeight) - objectHeight;
-            var maxValue = minValue + listHeight;
-
-            if (!IsInView(selectedObjectPosition, minValue, maxValue)) {
-                if (selectedObjectPosition < minValue) {
-                    ListScrollViewOffset = new Vector2(0, selectedObjectPosition);
-                } else if (selectedObjectPosition > maxValue) {
-                    ListScrollViewOffset = new Vector2(0, selectedObjectPosition - (listHeight + EditorStyles.label.TotalHeight()));
-                }
+            if (expectedScrollPosition < scrollPositionTop) {
+                ListScrollViewOffset.y = expectedScrollPosition;
+            } else if (expectedScrollPosition > scrollPositionBottom - ListViewItemHeight) {
+                var adjustment = expectedScrollPosition - (scrollPositionBottom - ListViewItemHeight);
+                var misalignedRows = Mathf.CeilToInt(adjustment / ListViewItemHeight);
+                ListScrollViewOffset.y += misalignedRows * ListViewItemHeight;
             }
         }
 
+        private float GetExpectedScrollPosition(int index) => index * ListViewItemHeight;
 
         private float RoundToObjectHeight(float viewportHeight, float objectHeight)
         {

@@ -91,7 +91,6 @@ namespace CollisionBear.PreviewObjectPicker
             }
 
             if (GUI.Button(selectButtonPosition, ObjectPickerContent, TinyButtonStyle)) {
-                PreviewSelectorEditor.CreateStyles();
                 PreviewSelectorEditor.ShowAuxWindow(type, property);
             }
 
@@ -117,7 +116,6 @@ namespace CollisionBear.PreviewObjectPicker
             }
 
             if (GUI.Button(selectButtonPosition, ObjectPickerContent, TinyButtonStyle)) {
-                PreviewSelectorEditor.CreateStyles();
                 PreviewSelectorEditor.ShowAuxWindow(type, property);
             }
 
