@@ -10,7 +10,7 @@ namespace CollisionBear.PreviewObjectPicker
     public class PreviewSelectorEditor : EditorWindow
     {
         private const string EditorName = "Preview Field";
-        private const string Version = "1.3.3";
+        private const string Version = "1.3.4";
         private const string CollisionBearUrl = "https://assetstore.unity.com/publishers/82099";
 
         private const int ListViewWidth = 280;

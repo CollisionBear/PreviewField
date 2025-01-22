@@ -14,7 +14,9 @@ namespace CollisionBear.PreviewObjectPicker
         private static GUIContent ObjectPickerContent = EditorGUIUtility.IconContent("d_PreMatCube");
         private static GUIContent PrefabContent = EditorGUIUtility.IconContent("Prefab Icon");
 
-        private static Texture2D BackgroundImage = PreviewRenderingUtility.CreateTexture(256, 256, new Color(0.32f, 0.32f, 0.32f, 1f));
+        private static Texture2D BackgroundImage;
+
+        private static Texture2D CreateBackGroundTexture() => PreviewRenderingUtility.CreateTexture(256, 256, new Color(0.32f, 0.32f, 0.32f, 1f));
 
         private static readonly GUIStyle TinyButtonStyle = new GUIStyle(EditorStyles.miniButton) {
             margin = new RectOffset(1, 1, 1, 1),
@@ -35,6 +37,10 @@ namespace CollisionBear.PreviewObjectPicker
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            if(BackgroundImage == null) {
+                BackgroundImage = CreateBackGroundTexture();
+            }
+
             if( DisplayType == null) {
                 DisplayType = GetTypeFromString(property.type);
 
