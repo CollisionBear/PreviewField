@@ -428,7 +428,11 @@ namespace CollisionBear.PreviewObjectPicker
         public void ChangeSelectedType(System.Type type)
         {
             SelectedType = type;
-            FoundObjects = FindAssetsOfType(type).OrderBy(a => a.Object.name).ToList();
+            FoundObjects = FindAssetsOfType(type)
+                .Where(a => a.Object != null)
+                .OrderBy(a => a.Object.name)
+                .ToList();
+
             ResetFilter();
 
             var mappedObjects = FoundObjects.ToDictionary(o => o.Id, o => o);
