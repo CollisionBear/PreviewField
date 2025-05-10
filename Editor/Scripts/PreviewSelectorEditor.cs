@@ -4,13 +4,11 @@ using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
-namespace CollisionBear.PreviewObjectPicker
-{
+namespace CollisionBear.PreviewObjectPicker {
     [InitializeOnLoad]
-    public class PreviewSelectorEditor : EditorWindow
-    {
+    public class PreviewSelectorEditor : EditorWindow {
         private const string EditorName = "Preview Field";
-        private const string Version = "1.3.4";
+        private const string Version = "1.3.6";
         private const string CollisionBearUrl = "https://assetstore.unity.com/publishers/82099";
 
         private const int ListViewWidth = 280;
@@ -22,16 +20,14 @@ namespace CollisionBear.PreviewObjectPicker
 
         private static Texture2D LogoTexture;
 
-        public class Asset<T> where T : Object
-        {
+        public class Asset<T> where T : Object {
             public T Object;
             public long Id;
 
             public Texture Icon;
             public string Name;
 
-            public Asset(T o, long id)
-            {
+            public Asset(T o, long id) {
                 Object = o;
                 Id = id;
                 Icon = AssetPreview.GetMiniThumbnail(Object);
@@ -41,8 +37,7 @@ namespace CollisionBear.PreviewObjectPicker
             private string GetObjectName(T o) => o?.name ?? "None";
         }
 
-        public static void ShowAuxWindow(System.Type type, SerializedProperty serializedProperty)
-        {
+        public static void ShowAuxWindow(System.Type type, SerializedProperty serializedProperty) {
             var window = CreateInstance<PreviewSelectorEditor>();
             window.ChangeSelectedType(type);
             window.SerializedProperty = serializedProperty;
@@ -74,8 +69,7 @@ namespace CollisionBear.PreviewObjectPicker
         private GUIStyle SelectedStyle;
         private GUIStyle UnselectedStyle;
 
-        private void OnEnable()
-        {
+        private void OnEnable() {
             CreateStyles();
 
             ObjectSearchField = new SearchField();
@@ -84,8 +78,7 @@ namespace CollisionBear.PreviewObjectPicker
             LogoTexture = Resources.Load<Texture2D>("CollsionsBearLogo");
         }
 
-        private void OnGUI()
-        {
+        private void OnGUI() {
             PreviewWidth = position.width - (ListViewWidth + 32);
             PreviewHeight = position.height - 28;
 
@@ -94,8 +87,7 @@ namespace CollisionBear.PreviewObjectPicker
             DrawLayout();
         }
 
-        private void OnDisable()
-        {
+        private void OnDisable() {
             if (SelectedObjectEditor != null) {
                 GameObject.DestroyImmediate(SelectedObjectEditor);
             }
@@ -202,7 +194,7 @@ namespace CollisionBear.PreviewObjectPicker
             }
         }
 
-        private GUIStyle GetGUIStyle(Asset<Object> o) {          
+        private GUIStyle GetGUIStyle(Asset<Object> o) {
             if (SelectedObject == o) {
                 return SelectedStyle;
             } else {
@@ -210,8 +202,7 @@ namespace CollisionBear.PreviewObjectPicker
             }
         }
 
-        private void DisplayRightColumn()
-        {
+        private void DisplayRightColumn() {
             var previewWidth = Mathf.Max(32, PreviewWidth);
             var previewHeight = Mathf.Max(32, PreviewHeight);
 
@@ -235,8 +226,7 @@ namespace CollisionBear.PreviewObjectPicker
             }
         }
 
-        private void HandleKeyboardInput()
-        {
+        private void HandleKeyboardInput() {
             if (Event.current.clickCount == 2) {
                 ApplyValue();
                 Close();
@@ -250,10 +240,10 @@ namespace CollisionBear.PreviewObjectPicker
                 } else if (Event.current.keyCode == KeyCode.UpArrow) {
                     UpdateSelectedObjectIndex(SelectedObjectIndex + -1);
                     Event.current.Use();
-                } else if(Event.current.keyCode == KeyCode.Return) {
+                } else if (Event.current.keyCode == KeyCode.Return) {
                     ApplyValue();
                     Close();
-                } else if(Event.current.keyCode == KeyCode.Escape) {
+                } else if (Event.current.keyCode == KeyCode.Escape) {
                     Close();
                 }
             }
@@ -268,19 +258,17 @@ namespace CollisionBear.PreviewObjectPicker
             ChangeSelectedObject(FilteredObjects[newIndex]);
         }
 
-        private void ApplyValue()
-        {
+        private void ApplyValue() {
             SerializedProperty.objectReferenceValue = SelectedObject.Object as Object;
             SerializedProperty.serializedObject.ApplyModifiedProperties();
         }
 
-        public void DisplaySelection(float previewWidth, float previewHeight)
-        {
+        public void DisplaySelection(float previewWidth, float previewHeight) {
             if (SelectedObjectEditor == null) {
                 return;
             }
 
-            if(previewHeight <= 0 || previewHeight <= 0) {
+            if (previewHeight <= 0 || previewHeight <= 0) {
                 return;
             }
 
@@ -288,8 +276,7 @@ namespace CollisionBear.PreviewObjectPicker
             Repaint();
         }
 
-        public List<Asset<Object>> FindAssetsOfType(System.Type type)
-        {
+        public List<Asset<Object>> FindAssetsOfType(System.Type type) {
             if (ObjectCache.ContainsKey(type)) {
                 return ObjectCache[type];
             }
@@ -299,7 +286,7 @@ namespace CollisionBear.PreviewObjectPicker
             var result = new List<Asset<Object>>();
             if (typeof(ScriptableObject).IsAssignableFrom(type)) {
                 result = FindScriptableObjectOfType(type);
-            } else if(typeof(GameObject).IsAssignableFrom(type)) {
+            } else if (typeof(GameObject).IsAssignableFrom(type)) {
                 result = FindGameObjects(type);
             } else if (typeof(Component).IsAssignableFrom(type)) {
                 result = FindPrefabsWithComponentType(type);
@@ -311,8 +298,7 @@ namespace CollisionBear.PreviewObjectPicker
             return result;
         }
 
-        public List<Asset<Object>> FindScriptableObjectOfType(System.Type type)
-        {
+        public List<Asset<Object>> FindScriptableObjectOfType(System.Type type) {
             return AssetDatabase.FindAssets(string.Format("t:{0}", type))
                 .Select(g => AssetDatabase.LoadAssetAtPath<Object>(AssetDatabase.GUIDToAssetPath(g)))
                 .OrderBy(o => o.name)
@@ -320,8 +306,7 @@ namespace CollisionBear.PreviewObjectPicker
                 .ToList();
         }
 
-        public List<Asset<Object>> FindAssetTypes(System.Type type)
-        {
+        public List<Asset<Object>> FindAssetTypes(System.Type type) {
             return AssetDatabase.FindAssets(string.Format("t:{0}", type.Name))
                 .Select(g => AssetDatabase.LoadAssetAtPath<Object>(AssetDatabase.GUIDToAssetPath(g)))
                 .OrderBy(o => o.name)
@@ -329,8 +314,7 @@ namespace CollisionBear.PreviewObjectPicker
                 .ToList();
         }
 
-        private List<Asset<Object>> FindGameObjects(System.Type type)
-        {
+        private List<Asset<Object>> FindGameObjects(System.Type type) {
             return AssetDatabase.FindAssets("t:GameObject")
                 .Select(g => AssetDatabase.GUIDToAssetPath(g))
                 .Where(p => p.EndsWith(".prefab"))
@@ -339,8 +323,7 @@ namespace CollisionBear.PreviewObjectPicker
                 .ToList();
         }
 
-        private List<Asset<Object>> FindPrefabsWithComponentType(System.Type type)
-        {
+        private List<Asset<Object>> FindPrefabsWithComponentType(System.Type type) {
             return AssetDatabase.FindAssets("t:GameObject")
                 .Select(g => AssetDatabase.GUIDToAssetPath(g))
                 .Where(p => p.EndsWith(".prefab"))
@@ -350,15 +333,13 @@ namespace CollisionBear.PreviewObjectPicker
                 .ToList();
         }
 
-        private bool HasComponent(GameObject gameObject, System.Type type)
-        {
+        private bool HasComponent(GameObject gameObject, System.Type type) {
             return gameObject.GetComponents<Component>()
                 .Where(t => type.IsInstanceOfType(t))
                 .Any();
         }
 
-        public List<Asset<Object>> FilterObjects(List<Asset<Object>> startCollection, string filter)
-        {
+        public List<Asset<Object>> FilterObjects(List<Asset<Object>> startCollection, string filter) {
             var result = startCollection.ToList();
 
             if (filter != string.Empty) {
@@ -370,13 +351,11 @@ namespace CollisionBear.PreviewObjectPicker
             return result;
         }
 
-        public void SetSelectedObject(long itemId)
-        {
+        public void SetSelectedObject(long itemId) {
             ChangeSelectedObject(GetSelectedObject(itemId));
         }
 
-        public Asset<Object> GetSelectedObject(long itemId)
-        {
+        public Asset<Object> GetSelectedObject(long itemId) {
             foreach (var item in FoundObjects) {
                 if (item.Id == itemId) {
                     return item;
@@ -386,8 +365,7 @@ namespace CollisionBear.PreviewObjectPicker
             return new Asset<Object>(null, 0);
         }
 
-        public void ChangeSelectedObject(Asset<Object> selectedObject)
-        {
+        public void ChangeSelectedObject(Asset<Object> selectedObject) {
             if (selectedObject == SelectedObject) {
                 return;
             }
@@ -425,8 +403,7 @@ namespace CollisionBear.PreviewObjectPicker
 
         private float GetExpectedScrollPosition(int index) => index * ListViewItemHeight;
 
-        public void ChangeSelectedType(System.Type type)
-        {
+        public void ChangeSelectedType(System.Type type) {
             SelectedType = type;
             FoundObjects = FindAssetsOfType(type)
                 .Where(a => a.Object != null)
@@ -439,8 +416,7 @@ namespace CollisionBear.PreviewObjectPicker
             SelectedObject = null;
         }
 
-        public void ResetFilter()
-        {
+        public void ResetFilter() {
             FilteredObjects = FilterObjects(FoundObjects, "");
             FilterString = string.Empty;
         }
