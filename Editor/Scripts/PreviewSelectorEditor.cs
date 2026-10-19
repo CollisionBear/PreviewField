@@ -379,10 +379,18 @@ namespace CollisionBear.PreviewObjectPicker {
             }
 
             if (SelectedObject != null) {
-                SelectedObjectEditor = Editor.CreateEditor(SelectedObject.Object);
+                SelectedObjectEditor = Editor.CreateEditor(GetPreviewObject(SelectedObject.Object));
             }
 
             GUI.FocusControl(null);
+        }
+
+        static Object GetPreviewObject(Object selected) {
+            if (selected is Component component && component.gameObject != null && component.gameObject.GetComponentInChildren<ParticleSystem>(true) != null) {
+                return component.gameObject;
+            }
+
+            return selected;
         }
 
         private void EnsureSelectItemInView(int index) {
