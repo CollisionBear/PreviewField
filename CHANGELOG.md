@@ -1,6 +1,15 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## 1.3.7
+- Added special check for particle previews.
+- Added the header from the preview window the PreviewField so it has the same controls.
+
+## 1.3.6
+- Fixed a null ref error when deleting some prefab that would have been shown in a list.
+
+## 1.3.5
+- Fixed a null warning from failure to create a default empty texture when drawing nothing.
 
 ## 1.3.4
  - Fixed a reintroduced GUI.DrawTexture() null warning from 1.3.3.
