@@ -14,6 +14,10 @@ namespace CollisionBear.PreviewObjectPicker {
         private const int ListViewWidth = 280;
         private const int ListViewItemHeight = 18;
         private const int FooterHeight = 30;
+        private const float PreviewHeaderHeight = 21f;
+        private const float PreviewHeaderDragPadding = 3f;
+        private const float PreviewHeaderMinimumDragWidth = 20f;
+        private const float MinimumPreviewSize = 32f;
 
         private static readonly Vector2 MinWindowSize = new Vector2(400, 400);
         static Dictionary<System.Type, List<Asset<Object>>> ObjectCache = new Dictionary<System.Type, List<Asset<Object>>>();
@@ -68,6 +72,11 @@ namespace CollisionBear.PreviewObjectPicker {
 
         private GUIStyle SelectedStyle;
         private GUIStyle UnselectedStyle;
+        private GUIStyle PreviewToolbarStyle;
+        private GUIStyle PreviewToolbarLabelStyle;
+        private GUIStyle PreviewTitleMeasureStyle;
+
+        private static readonly GUIContent DefaultPreviewTitle = new GUIContent("Preview");
 
         private void OnEnable() {
             CreateStyles();
@@ -99,7 +108,9 @@ namespace CollisionBear.PreviewObjectPicker {
             SelectedStyle.normal.background = PreviewRenderingUtility.CreateTexture(300, ListViewItemHeight, new Color(0.24f, 0.48f, 0.9f));
 
             UnselectedStyle = new GUIStyle(GUI.skin.label);
-
+            PreviewToolbarStyle = "preToolbar";
+            PreviewToolbarLabelStyle = "ToolbarBoldLabel";
+            PreviewTitleMeasureStyle = "preToolbar2";
         }
 
         private void DrawLayout() {
@@ -268,12 +279,33 @@ namespace CollisionBear.PreviewObjectPicker {
                 return;
             }
 
-            if (previewHeight <= 0 || previewHeight <= 0) {
+            if (previewWidth <= 0 || previewHeight <= 0) {
                 return;
             }
 
-            SelectedObjectEditor.OnInteractivePreviewGUI(GUILayoutUtility.GetRect(previewWidth, previewHeight), GUIStyle.none);
+            DrawPreviewHeader();
+            float imageHeight = Mathf.Max(MinimumPreviewSize, previewHeight - PreviewHeaderHeight);
+            SelectedObjectEditor.DrawPreview(GUILayoutUtility.GetRect(previewWidth, imageHeight));
             Repaint();
+        }
+
+        private void DrawPreviewHeader() {
+            var title = SelectedObjectEditor.GetPreviewTitle();
+            if (title == null || string.IsNullOrEmpty(title.text)) {
+                title = DefaultPreviewTitle;
+            }
+
+            EditorGUILayout.BeginHorizontal(PreviewToolbarStyle, GUILayout.Height(PreviewHeaderHeight));
+            GUILayout.FlexibleSpace();
+            var titleArea = GUILayoutUtility.GetLastRect();
+            float maxLabelWidth = titleArea.width - PreviewHeaderDragPadding - PreviewHeaderMinimumDragWidth;
+            float labelWidth = Mathf.Min(maxLabelWidth, PreviewTitleMeasureStyle.CalcSize(title).x);
+            GUI.Label(new Rect(titleArea.x, titleArea.y, labelWidth, titleArea.height), title, PreviewToolbarLabelStyle);
+            if (SelectedObjectEditor.HasPreviewGUI()) {
+                SelectedObjectEditor.OnPreviewSettings();
+            }
+
+            EditorGUILayout.EndHorizontal();
         }
 
         public List<Asset<Object>> FindAssetsOfType(System.Type type) {
