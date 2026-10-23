@@ -20,9 +20,9 @@ namespace CollisionBear.PreviewObjectPicker {
         private const float MinimumPreviewSize = 32f;
 
         private static readonly Vector2 MinWindowSize = new Vector2(400, 400);
-        static Dictionary<System.Type, List<Asset<Object>>> ObjectCache = new Dictionary<System.Type, List<Asset<Object>>>();
+        private static readonly Dictionary<System.Type, List<Asset<Object>>> ObjectCache = new Dictionary<System.Type, List<Asset<Object>>>();
 
-        private static Texture2D LogoTexture;
+        private Texture2D LogoTexture;
 
         public class Asset<T> where T : Object {
             public T Object;
